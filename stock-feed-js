@@ -1,0 +1,86 @@
+var StockFeed = (function (PowerHouse) {
+
+  var config = {
+    apiUrl: 'https://www.quandl.com/api/v3/datasets/LSE/BILN.json',
+    apiKey: 'qqUUeSp2YFsUKCZMTZZP',
+    selector: '.stock-price'
+  };
+
+  /**
+   * Show the popup
+   */
+  var _show = function (title, url) {
+
+    var html = '',
+    monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ],
+    stockCache = _readCookie();
+    if (stockCache !== (undefined || null)) {
+
+      var element = document.querySelector(config.selector);
+      element.innerHTML = _readCookie('stockPrice');
+
+    } else {
+
+      PowerHouse.getFileContents(config.apiUrl + '?api_key=' + config.apiKey + '&limit=1', function (response) {
+
+        var json = JSON.parse(response),
+            date = new Date(json.dataset.refreshed_at),
+            time = date.getHours() + ':' + date.getMinutes(),
+            day = date.getDate() + ' ' + monthNames[date.getMonth()] + ' ' + date.getFullYear();
+
+        html = '<strong>Stock Price: ' + json.dataset.data[0][1].toFixed(2) + 'p</strong>' + json.dataset.data[0][6].toFixed(2) + 'p (' + json.dataset.data[0][7] + '%) at ' + time + ', ' + day;
+
+        document.querySelector(config.selector).innerHTML = html;
+
+        _setCookie(html);
+      });
+
+    }
+
+  };
+
+  var _setCookie = function (value) {
+    var date = new Date();
+    date.setTime(date.getTime() + 43200000);
+    var expires = "; expires=" + date.toGMTString();
+    document.cookie = escape('stockPrice') + "=" + escape(value) + expires + "; path=/";
+  }
+
+  var _readCookie = function () {
+    var nameEQ = escape('stockPrice') + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return unescape(c.substring(nameEQ.length, c.length));
+    }
+    return null;
+  }
+
+  /**
+   * Initialise
+   */
+  var init = function () {
+
+    _show();
+
+  };
+
+  return {
+    init: init
+  };
+
+})(PowerHouse);
