@@ -38,7 +38,7 @@ var StockFeed = (function () {
 
         var json = JSON.parse(response),
             date = new Date(json.dataset.refreshed_at),
-            time = date.getHours() + ':' + date.getMinutes(),
+            time = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2),
             day = date.getDate() + ' ' + monthNames[date.getMonth()] + ' ' + date.getFullYear();
 
         html = '<strong>Stock Price: ' + json.dataset.data[0][1].toFixed(2) + 'p</strong>' + json.dataset.data[0][6].toFixed(2) + 'p (' + json.dataset.data[0][7] + '%) at ' + time + ', ' + day;
